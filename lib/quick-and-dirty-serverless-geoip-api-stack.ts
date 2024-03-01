@@ -8,6 +8,8 @@ import {
   aws_lambda,
   aws_lambda_nodejs,
   aws_apigatewayv2,
+  aws_events,
+  aws_events_targets,
 } from "aws-cdk-lib";
 
 import * as path from "path";
@@ -27,7 +29,6 @@ export class QuickAndDirtyServerlessGeoipApiStack extends Stack {
         memorySize: 512,
         bundling: {
           commandHooks: {
-            // Copy a file so that it will be included in the bundled asset
             afterBundling(inputDir: string, outputDir: string): string[] {
               return [`cp ${inputDir}/lambda/GeoLite2-City.mmdb ${outputDir}`];
             },
@@ -43,7 +44,6 @@ export class QuickAndDirtyServerlessGeoipApiStack extends Stack {
     );
 
     const httpApi = new aws_apigatewayv2.HttpApi(this, "HttpApi");
-
     const geoIPLookupIntegration =
       new aws_apigatewayv2_integrations.HttpLambdaIntegration(
         "geoIPLookupIntegration",
@@ -55,6 +55,16 @@ export class QuickAndDirtyServerlessGeoipApiStack extends Stack {
       integration: geoIPLookupIntegration,
     });
 
+    // CloudWatch Events Rule to keep the Lambda function warm
+    const warmupRule = new aws_events.Rule(this, "WarmupRule", {
+      schedule: aws_events.Schedule.rate(Duration.minutes(3)), // Adjust the rate as necessary
+    });
+
+    warmupRule.addTarget(
+      new aws_events_targets.LambdaFunction(geoIPLookupFunction)
+    );
+
+    // Output the HTTP API endpoint
     new CfnOutput(this, "sampleApiEndpoint", {
       value: httpApi.apiEndpoint,
     });
