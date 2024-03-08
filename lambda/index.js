@@ -20,7 +20,7 @@ exports.handler = async function(event) {
     try {
         // Let's query the GeoIP DB with either the value of the "ip" query string parameter, or the requester's IP
         const geoIPLookupResponse = reader.city(
-            event.queryStringParameters ? event.queryStringParameters.ip : event.requestContext.http.sourceIp
+            event.queryStringParameters ? event.queryStringParameters.ip : event.ip ? event.ip : event.requestContext.http.sourceIp
         );
 
         // Return the result to the requestor
