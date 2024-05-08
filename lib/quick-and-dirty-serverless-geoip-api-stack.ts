@@ -11,7 +11,6 @@ import {
   aws_events,
   aws_events_targets,
 } from "aws-cdk-lib";
-
 import * as path from "path";
 
 export class QuickAndDirtyServerlessGeoipApiStack extends Stack {
@@ -22,6 +21,7 @@ export class QuickAndDirtyServerlessGeoipApiStack extends Stack {
       this,
       "geoIPLookup",
       {
+        functionName: "featpaper-geoIPLookupFunction",
         runtime: aws_lambda.Runtime.NODEJS_20_X,
         entry: path.join(__dirname, "../lambda/index.js"),
         handler: "handler",
@@ -43,17 +43,24 @@ export class QuickAndDirtyServerlessGeoipApiStack extends Stack {
       }
     );
 
-    const httpApi = new aws_apigatewayv2.HttpApi(this, "HttpApi");
-    const geoIPLookupIntegration =
-      new aws_apigatewayv2_integrations.HttpLambdaIntegration(
-        "geoIPLookupIntegration",
-        geoIPLookupFunction
-      );
-    httpApi.addRoutes({
-      path: "/",
-      methods: [aws_apigatewayv2.HttpMethod.GET],
-      integration: geoIPLookupIntegration,
-    });
+    // Conditionally create the API Gateway only in ap-northeast-2
+    if (props?.env?.region === "ap-northeast-2") {
+      const httpApi = new aws_apigatewayv2.HttpApi(this, "HttpApi");
+      const geoIPLookupIntegration =
+        new aws_apigatewayv2_integrations.HttpLambdaIntegration(
+          "geoIPLookupIntegration",
+          geoIPLookupFunction
+        );
+      httpApi.addRoutes({
+        path: "/",
+        methods: [aws_apigatewayv2.HttpMethod.GET],
+        integration: geoIPLookupIntegration,
+      });
+
+      new CfnOutput(this, "sampleApiEndpoint", {
+        value: httpApi.apiEndpoint,
+      });
+    }
 
     // CloudWatch Events Rule to keep the Lambda function warm
     const warmupRule = new aws_events.Rule(this, "WarmupRule", {
@@ -63,10 +70,5 @@ export class QuickAndDirtyServerlessGeoipApiStack extends Stack {
     warmupRule.addTarget(
       new aws_events_targets.LambdaFunction(geoIPLookupFunction)
     );
-
-    // Output the HTTP API endpoint
-    new CfnOutput(this, "sampleApiEndpoint", {
-      value: httpApi.apiEndpoint,
-    });
   }
 }

@@ -79,10 +79,19 @@ downloadFile(
       .then((files) => {
         console.log("Extracted files:", files);
         // Initialize the AWS CDK stack after the database is extracted
-        new QuickAndDirtyServerlessGeoipApiStack(
-          app,
-          "QuickAndDirtyServerlessGeoipApiStack"
-        );
+        [
+          "ap-northeast-2",
+          "us-east-1",
+          "us-west-1",
+          "eu-central-1",
+          "ap-south-1",
+        ].forEach((region) => {
+          new QuickAndDirtyServerlessGeoipApiStack(
+            app,
+            `QuickAndDirtyServerlessGeoipApiStack-${region}`,
+            { env: { region: region } }
+          );
+        });
       })
       .catch((error) => {
         console.error("Decompression error:", error);

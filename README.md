@@ -31,9 +31,13 @@ npm install
 
 # Bootstrap your environment
 npx cdk bootstrap
+-> changed bootstrap by regions
+npx cdk bootstrap aws://728418389273/eu-central-1  --context maxMindLicenseKey=
 
 # Deploy the app
-npx cdk deploy --context maxMindLicenseKey=l***********w
+npx cdk deploy --all --context maxMindLicenseKey=l***********w
+-> added --all
+
 ```
 
 
