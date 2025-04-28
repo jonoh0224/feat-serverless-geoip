@@ -4,20 +4,17 @@ Simple serverless service (built with AWS CDK) for translating an IP address to 
 
 During deployment you provide a MaxMind license key which is used to automatically retrieve and bundle up the latest MaxMind GeoLite2 City MMDB within the Lambda function.
 
-
 ## Architecture
 
 ![AWS Architecture Diagram](docs/quick-and-dirty-serverless-geoip-api.png)
 
-
 ## Prequisites
 
-* [Git](https://git-scm.com/) (of course)
-* [AWS Account](https://portal.aws.amazon.com/billing/signup#/)
-* [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html#cli-configure-quickstart-config)
-* [Node 14.x](https://nodejs.org/en/download/)
-* [(Free) MaxMind License Key](https://www.maxmind.com/en/geolite2/signup)
-
+- [Git](https://git-scm.com/) (of course)
+- [AWS Account](https://portal.aws.amazon.com/billing/signup#/)
+- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html#cli-configure-quickstart-config)
+- [Node 14.x](https://nodejs.org/en/download/)
+- [(Free) MaxMind License Key](https://www.maxmind.com/en/geolite2/signup)
 
 ## Setup: Deployment
 
@@ -37,15 +34,16 @@ npx cdk bootstrap aws://728418389273/eu-central-1  --context maxMindLicenseKey=
 # Deploy the app
 npx cdk deploy --all --context maxMindLicenseKey=l***********w
 -> added --all
-
+licensekey 는 notion 참고
+https://www.notion.so/featcorp/maxmind-17e5e94c463c4c5e902c5e7f9471893a?pvs=4
 ```
-
 
 ## Usage: Get details for an IP
 
 Using the `sampleApiEndpoint` output from the `cdk deploy` command in the previous section:
 
 ### Option 1: Your IP
+
 ```
 # curl -s "https://g*********h.execute-api.us-east-1.amazonaws.com/" | jq
 {
@@ -115,6 +113,7 @@ Using the `sampleApiEndpoint` output from the `cdk deploy` command in the previo
 ```
 
 ### Option 2: Supply an IP
+
 ```
 # curl -s "https://g*********h.execute-api.us-east-1.amazonaws.com/?ip=8.8.8.8" | jq
 {
